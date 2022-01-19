@@ -1,7 +1,12 @@
 let ballY = 580;
 let playerSpeed = 4;
-let playerWidth = 70;
-let playerY = 590;
+let playerWidth = 120;
+let playerHeight = 10;
+// let playerY = 590;
+let ballSize = 15;
+let targetWidth = 200;
+let playerScore = '';
+let startGame = false;
 
 window.onload = () => {
 
@@ -20,13 +25,20 @@ class Court {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }    
 
-   
+    score() {
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = 'bold 30px serif';
+        this.ctx.fillText(`Score: ${playerScore}`, 400, 400)
+    
+    }
 }
+
+
 
 class Player {
      constructor(){
          this.x = (court.canvas.width / 2) - playerWidth/2;
-         this.y = playerY; 
+         this.y = court.canvas.height - playerHeight; 
          this.speedX = 0;
          
     }
@@ -37,37 +49,32 @@ class Player {
         };
 
         court.ctx.fillStyle = 'white';
-        court.ctx.fillRect(this.x , this.y, playerWidth, 10);
-
+        court.ctx.fillRect(this.x , this.y, playerWidth, playerHeight);
     }
 
     moveRight(){
         this.x += playerSpeed;
         this.speedX = playerSpeed;
-        
     }
     
     moveLeft(){
         this.x -= playerSpeed;
         this.speedX = -playerSpeed;
-        
     }
-
 }
 
 class Ball{
     constructor(){
         this.x = court.canvas.width/2;
         this.y = ballY;
-        this.speedY = 4;
-        this.speedX = 2;
-
+        this.speedY = 6;
+        this.speedX = 4;
     }
 
     drawBall() {
         court.ctx.fillStyle	= 'yellow';	
         court.ctx.beginPath();	
-        court.ctx.arc(this.x, this.y, 10, 0, Math.PI*2,	true);
+        court.ctx.arc(this.x, this.y, ballSize, 0, Math.PI*2,	true);
         court.ctx.fill();
     }
 
@@ -76,25 +83,21 @@ class Ball{
             this.speedY = -this.speedY;
             this.speedX = -this.speedX;
             this.x = court.canvas.width/2;  // reset ball when its 
-            this.y = ballY;                 // equal to cavas height
+            this.y = ballY - ballSize;                 // equal to cavas height
         }
     }
 
     ballMovement(){
         this.y -= this.speedY;
-        this.x -= this.speedX;
+        this.x -= this.speedX; //
+        console.log(this.y)
 
         if(this.y < 0){
             this.speedY = -this.speedY;
            
-
         } else if(this.y > court.canvas.height){
-            if((ballY > playerY) && (ballY < playerY + playerWidth)) {
-                this.speedY = -this.speedY;
-                console.log('hit ball')
-            }else{
-                ball.resetBall()
-            }
+            ball.resetBall()
+            playerScore = '';
            
             // this.speedY = -this.speedY;
             // this.x = court.canvas.width/2;  // reset ball when its 
@@ -102,33 +105,64 @@ class Ball{
         }
 
         if(this.x < 0){
-            // this.speedX = -this.speedX;
+            this.speedX = -this.speedX;
         } else if(this.x > court.canvas.width){
             this.speedX = -this.speedX;
         }
         
     }
 
+    hitPlayer(){
+        if(this.y + ballSize >= player.y ){
+            if(this.x >=  player.x && this.x <= player.x + playerWidth) {
+                this.speedY = -this.speedY
+            
+            }
+        }
+    }
+
+    hitTarget(){
+        if(this.y - ballSize <= target.y + 9 ){
+            if(this.x >=  target.x && this.x <= target.x + targetWidth) {
+                this.speedY = -this.speedY
+                playerScore++
+            }
+        }
+
+        if(this.y - ballSize <= target.y + 9 ){
+            if(this.x >=  200 && this.x <= 200 + targetWidth) {
+                this.speedY = -this.speedY
+                playerScore++
+            }
+        }
+
+        if(this.y - ballSize <= target.y + 9 ){
+            if(this.x >=  950 && this.x <= 950 + targetWidth) {
+                this.speedY = -this.speedY
+                playerScore++
+            }
+        }
+
+    }
    
-        
 }
 
 class Target{
     constructor(){
-        this.x = (court.canvas.width / 2)-35;
+        this.x = (court.canvas.width / 2)-50;
         this.y = 1;
     } 
 
     drawTarget(){
         court.ctx.fillStyle = 'white';
-        court.ctx.fillRect(this.x, this.y, 100, 9);
+        court.ctx.fillRect(this.x, this.y, targetWidth, 9);
         court.ctx.fillStyle = 'white';
-        court.ctx.fillRect(250, this.y, 100, 9);
+        court.ctx.fillRect(200, this.y, targetWidth, 9);
         court.ctx.fillStyle = 'white';
-        court.ctx.fillRect(950, this.y, 100, 9);
+        court.ctx.fillRect(950, this.y, targetWidth, 9);
         
-
     }
+   
 }
 
 const court = new Court();
@@ -139,15 +173,23 @@ const target = new Target();
 
 function update() {
     court.clear();
+    court.score();
     player.drawPlayer();
     ball.drawBall();
     target.drawTarget(); 
     ball.ballMovement();
+    ball.hitPlayer();
+    ball.hitTarget();
     requestAnimationFrame(update);
 }
 
 
 document.addEventListener('keydown', (event) => {
+    if (event.key === 's') {
+        startGame = true;
+        return;
+    }
+
     const pressedKey = event.key;
     console.log(pressedKey)
 
@@ -158,5 +200,10 @@ document.addEventListener('keydown', (event) => {
               break;
        
     }
+
+});
+
+document.addEventListener('keyup', (event) => {
+    player.speedX = 0;
 
 })
