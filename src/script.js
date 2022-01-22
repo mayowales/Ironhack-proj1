@@ -39,7 +39,6 @@ class Player {
         this.x = (court.canvas.width / 2) - playerWidth / 2;
         this.y = court.canvas.height - playerHeight;
         this.speedX = 0;
-
     }
 
     drawPlayer() {
@@ -69,7 +68,6 @@ class Ball {
         this.speedY = 8;
         this.speedX = 4;
         this.direction = -1;
-
         this.isScoring = false;
     }
 
@@ -125,9 +123,8 @@ class Ball {
 
     addScore() {
         if (!this.isScoring) {
-            this.isScoring = true;
             playerScore++;
-           
+            this.isScoring = true;
             winGame();
         }
     }
@@ -158,7 +155,7 @@ class Ball {
 }
 
 const winGame = () => {
-    if (playerScore === 3) {
+    if (playerScore >= 10) {
         endGame = true;
         court.ctx.fillText('You win!! Djokovic wont have done better', court.canvas.width / 2, court.canvas.height / 2);
     }
